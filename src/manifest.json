@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "google-chat-extension",
+  "description": "google-chat-extension",
+  "version": "0.1.0",
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/chat/*"],
+      "css": ["content_scripts/mail.css"],
+      "js": ["content_scripts/mail.js"]
+    },
+    {
+      "matches": ["https://chat.google.com/*"],
+      "all_frames": true,
+      "js": ["content_scripts/chat.js"]
+    }
+  ]
+}
