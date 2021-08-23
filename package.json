@@ -1,0 +1,12 @@
+{
+  "name": "google-chat-extension",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^2.3.2"
+  }
+}
