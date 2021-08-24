@@ -17,6 +17,7 @@
     $newHoverButton.removeAttribute('jsname');
     $newHoverButton.removeAttribute('jslog');
     $newHoverButton.removeAttribute('data-id');
+    $newHoverButton.setAttribute('data-zvhq', 'true');
     $newHoverButton.setAttribute('aria-label', label);
     $newHoverButton.setAttribute('data-tooltip', label);
     $newHoverButton.querySelector('svg').innerHTML = icon;
@@ -30,15 +31,15 @@
     }
     for (const $message of document.querySelectorAll('[jsname="Ne3sFf"]')) {
       const messageId = $message.getAttribute('data-id');
-      if (isEmpty(messageId)) {
+      if (isEmpty(messageId) || $message.querySelector('[data-zvhq]') != null) {
         continue;
       }
-      const $lastHoverButton = $message.querySelector('[jsname="MLuah"]');
-      if ($lastHoverButton == null || $lastHoverButton.nextElementSibling != null) {
+      const $hoverButton = $message.querySelector('[jsname="MLuah"]');
+      if ($hoverButton == null) {
         continue;
       }
-      const $newHoverButton = cloneHoverButton($lastHoverButton, linkIcon, 'リンクをコピー');
-      $lastHoverButton.parentElement.appendChild($newHoverButton);
+      const $newHoverButton = cloneHoverButton($hoverButton, linkIcon, 'リンクをコピー');
+      $hoverButton.parentElement.appendChild($newHoverButton);
       $newHoverButton.addEventListener('click', () => {
         const $input = document.createElement('input');
         $input.value = `https://mail.google.com/chat/#chat/${groupId}/${messageId}`;
