@@ -8,6 +8,52 @@
   }
 
   /**
+   * @param {Date} date
+   */
+  function formatDate(date) {
+    const y = date.getFullYear();
+    const MM = ('0' + (date.getMonth() + 1)).slice(-2);
+    const dd = ('0' + date.getDate()).slice(-2);
+    const HH = ('0' + date.getHours()).slice(-2);
+    const mm = ('0' + date.getMinutes()).slice(-2);
+    return `${y}/${MM}/${dd} ${HH}:${mm}`;
+  }
+
+  /**
+   * @param {string} tagName
+   * @param {{ [attributeName: string]: string }} [attributeByName]
+   * @param {(Element | string)[] | string} [children]
+   */
+  function h(tagName, attributeByName, children) {
+    if (typeof attributeByName === 'string' || Array.isArray(attributeByName)) {
+      children = attributeByName;
+      attributeByName = undefined;
+    }
+    const $element = document.createElement(tagName);
+    if (typeof attributeByName === 'object') {
+      for (const [attributeName, attribute] of Object.entries(attributeByName)) {
+        $element.setAttribute(attributeName, attribute);
+      }
+    }
+    if (typeof children === 'string') {
+      $element.textContent = children;
+    }
+    if (Array.isArray(children)) {
+      for (const child of children) {
+        if (child != null) {
+          if (typeof child === 'string') {
+            $element.textContent = child;
+          }
+          if (child instanceof Element) {
+            $element.appendChild(child);
+          }
+        }
+      }
+    }
+    return $element;
+  }
+
+  /**
    * @param {Element} $button
    * @param {string} icon
    * @param {string} label
@@ -49,6 +95,19 @@
         document.execCommand('copy');
         $input.remove();
       });
+      const $timestamp = $message.querySelector('[data-absolute-timestamp]');
+      if ($timestamp != null) {
+        const date = new Date(parseInt($timestamp.getAttribute('data-absolute-timestamp'), 10));
+        const $timestampTooltip = h('div', { class: 'zvhq-tooltip', style: 'display: none' }, formatDate(date));
+        $timestamp.parentElement.style.position = 'relative';
+        $timestamp.parentElement.appendChild($timestampTooltip);
+        $timestamp.addEventListener('mouseenter', () => {
+          $timestampTooltip.style.display = '';
+        });
+        $timestamp.addEventListener('mouseleave', () => {
+          $timestampTooltip.style.display = 'none';
+        });
+      }
     }
   }
 
