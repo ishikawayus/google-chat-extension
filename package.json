@@ -3,10 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "lint": "prettier --check .",
-    "lint:fix": "prettier --write ."
+    "lint": "prettier --check . && eslint src/**/*.js && stylelint src/**/*.css",
+    "lint:fix": "prettier --write . && eslint --fix src/**/*.js && stylelint --fix src/**/*.css"
   },
   "devDependencies": {
-    "prettier": "^2.3.2"
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "prettier": "^2.3.2",
+    "stylelint": "^13.13.1",
+    "stylelint-config-prettier": "^8.0.2",
+    "stylelint-config-standard": "^22.0.0"
   }
 }
