@@ -1,69 +1,52 @@
 (() => {
   'use strict';
 
+  const { isNotEmpty, h, i } = window.y9JTVCMg;
+
   const closeIcon = `<path d="M0 0h24v24H0V0z" fill="none"></path><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path>`;
 
-  function isEmpty(s) {
-    return s == null || s.length === 0;
+  function text() {
+    return h('input');
+  }
+
+  function numeric() {
+    return h('input', { type: 'number', min: '1' });
+  }
+
+  function date() {
+    return h('input', { type: 'date' });
   }
 
   /**
-   * @param {string} tagName
-   * @param {{ [attributeName: string]: string }} [attributeByName]
-   * @param {(Element | string)[] | string} [children]
+   * @param {string} initial
+   * @param {[string, string][]} options
    */
-  function h(tagName, attributeByName, children) {
-    if (typeof attributeByName === 'string' || Array.isArray(attributeByName)) {
-      children = attributeByName;
-      attributeByName = undefined;
-    }
-    const $element = document.createElement(tagName);
-    if (typeof attributeByName === 'object') {
-      for (const [attributeName, attribute] of Object.entries(attributeByName)) {
-        $element.setAttribute(attributeName, attribute);
-      }
-    }
-    if (typeof children === 'string') {
-      $element.textContent = children;
-    }
-    if (Array.isArray(children)) {
-      for (const child of children) {
-        if (child != null) {
-          if (typeof child === 'string') {
-            $element.textContent = child;
-          }
-          if (child instanceof Element) {
-            $element.appendChild(child);
-          }
-        }
-      }
-    }
-    return $element;
+  function select(initial, options) {
+    return h(
+      'select',
+      options.map(([value, label]) => h('option', value === initial ? { value, selected: 'true' } : { value }, label))
+    );
   }
 
   /**
-   * @param {string} icon
+   * @typedef {{
+   *   normal: Element,
+   *   plus: Element,
+   *   minus: Element,
+   *   from: Element,
+   *   at: Element,
+   *   before: Element,
+   *   after: Element,
+   *   olderValue: Element,
+   *   olderUnit: Element,
+   *   newerValue: Element,
+   *   newerUnit: Element,
+   *   tz: Element,
+   *   has: Element,
+   *   is: Element }} Form
    */
-  function i(icon) {
-    const $svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    $svg.setAttribute('fill', '#5f6368');
-    $svg.setAttribute('height', '24px');
-    $svg.setAttribute('width', '24px');
-    $svg.setAttribute('viewBox', '0 0 24 24');
-    $svg.innerHTML = icon;
-    return $svg;
-  }
 
   function createForm() {
-    const text = () => h('input');
-    const numeric = () => h('input', { type: 'number', min: '1' });
-    const date = () => h('input', { type: 'date' });
-    const select = (initial, options) =>
-      h(
-        'select',
-        options.map(([value, label]) => h('option', value === initial ? { value, selected: 'true' } : { value }, label))
-      );
-
     return {
       normal: text(),
       plus: text(),
@@ -109,14 +92,25 @@
     };
   }
 
-  function createDialog(form, $dialogCloseButton, $dialogSearchButton) {
-    const formControl = (label, example, ...$inputList) =>
-      h('div', { class: `yqwh-form-control` }, [
-        h('label', label),
-        h('div', $inputList),
-        example != null ? h('span', { class: `yqwh-hint` }, example) : undefined,
-      ]);
+  /**
+   * @param {string} label
+   * @param {string | null | undefined} example
+   * @param  {...Element} $inputList
+   */
+  function formControl(label, example, ...$inputList) {
+    return h('div', { class: `yqwh-form-control` }, [
+      h('label', label),
+      h('div', $inputList),
+      example != null ? h('span', { class: `yqwh-hint` }, example) : undefined,
+    ]);
+  }
 
+  /**
+   * @param {Form} form
+   * @param {Element} $dialogCloseButton
+   * @param {Element} $dialogSearchButton
+   */
+  function createDialog(form, $dialogCloseButton, $dialogSearchButton) {
     return h('div', { class: `yqwh-dialog` }, [
       h('div', { class: `yqwh-dialog-header` }, [
         h('div', '高度な検索'),
@@ -155,7 +149,7 @@
     }
     const $button = $form.querySelector('button[role="button"]');
     const $input = $form.querySelector('input');
-    if ($button == null || $input == null) {
+    if (!($button instanceof HTMLButtonElement) || $input == null) {
       return;
     }
 
@@ -179,7 +173,7 @@
       $dialogBackground.style.display = '';
     });
     $dialogBackground.addEventListener('click', (event) => {
-      if (!$dialog.contains(event.target)) {
+      if (event.target instanceof Node && !$dialog.contains(event.target)) {
         $dialogBackground.style.display = 'none';
       }
     });
@@ -188,10 +182,10 @@
     });
     $dialogSearchButton.addEventListener('click', () => {
       const conditions = [];
-      if (!isEmpty(form.normal.value)) {
+      if (isNotEmpty(form.normal.value)) {
         conditions.push(form.normal.value);
       }
-      if (!isEmpty(form.plus.value)) {
+      if (isNotEmpty(form.plus.value)) {
         conditions.push(
           form.plus.value
             .split(' ')
@@ -199,7 +193,7 @@
             .join(' ')
         );
       }
-      if (!isEmpty(form.minus.value)) {
+      if (isNotEmpty(form.minus.value)) {
         conditions.push(
           form.minus.value
             .split(' ')
@@ -207,7 +201,7 @@
             .join(' ')
         );
       }
-      if (!isEmpty(form.from.value)) {
+      if (isNotEmpty(form.from.value)) {
         conditions.push(
           form.from.value
             .split(' ')
@@ -215,7 +209,7 @@
             .join(' ')
         );
       }
-      if (!isEmpty(form.at.value)) {
+      if (isNotEmpty(form.at.value)) {
         conditions.push(
           form.at.value
             .split(' ')
@@ -223,25 +217,25 @@
             .join(' ')
         );
       }
-      if (!isEmpty(form.before.value)) {
+      if (isNotEmpty(form.before.value)) {
         conditions.push('before:' + form.before.value);
       }
-      if (!isEmpty(form.after.value)) {
+      if (isNotEmpty(form.after.value)) {
         conditions.push('after:' + form.after.value);
       }
-      if (!isEmpty(form.olderValue.value)) {
+      if (isNotEmpty(form.olderValue.value)) {
         conditions.push('older_than:' + form.olderValue.value + form.olderUnit.value);
       }
-      if (!isEmpty(form.newerValue.value)) {
+      if (isNotEmpty(form.newerValue.value)) {
         conditions.push('newer_than:' + form.newerValue.value + form.newerUnit.value);
       }
-      if (!isEmpty(form.tz.value)) {
+      if (isNotEmpty(form.tz.value)) {
         conditions.push('tz:' + form.tz.value);
       }
-      if (!isEmpty(form.has.value)) {
+      if (isNotEmpty(form.has.value)) {
         conditions.push('has:' + form.has.value);
       }
-      if (!isEmpty(form.is.value)) {
+      if (isNotEmpty(form.is.value)) {
         conditions.push('is:' + form.is.value);
       }
       if (conditions.length > 0) {

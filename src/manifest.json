@@ -7,13 +7,13 @@
     {
       "matches": ["https://mail.google.com/chat/*"],
       "css": ["content_scripts/mail.css"],
-      "js": ["content_scripts/mail.js"]
+      "js": ["content_scripts/common.js", "content_scripts/mail.js"]
     },
     {
       "matches": ["https://chat.google.com/*"],
       "all_frames": true,
       "css": ["content_scripts/chat.css"],
-      "js": ["content_scripts/chat.js"]
+      "js": ["content_scripts/common.js", "content_scripts/chat.js"]
     }
   ]
 }
