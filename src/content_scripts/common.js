@@ -76,11 +76,77 @@
     return $svg;
   }
 
+  /**
+   * @param {string} key
+   * @returns {Promise<any>}
+   */
+  function loadObject(key) {
+    return new Promise((resolve, reject) => {
+      window.chrome.storage.local.get(key, (items) => {
+        if (window.chrome.runtime.lastError) {
+          reject(window.chrome.runtime.lastError);
+        } else {
+          resolve(items[key]);
+        }
+      });
+    });
+  }
+
+  /**
+   * @param {string} key
+   * @param {any} obj
+   * @returns {Promise<void>}
+   */
+  function saveObject(key, obj) {
+    return new Promise((resolve, reject) => {
+      const items = { [key]: obj };
+      window.chrome.storage.local.set(items, () => {
+        if (window.chrome.runtime.lastError) {
+          reject(window.chrome.runtime.lastError);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * @returns {Promise<Record<string, Pin[]>>}
+   */
+  async function loadPins() {
+    return (await loadObject('pins')) ?? {};
+  }
+
+  /**
+   * @param {Record<string, Pin[]>} pins
+   */
+  function savePins(pins) {
+    return saveObject('pins', pins);
+  }
+
+  /**
+   * @returns {Promise<Record<string, Bookmark[]>>}
+   */
+  async function loadBookmarks() {
+    return (await loadObject('bookmarks')) ?? {};
+  }
+
+  /**
+   * @param {Record<string, Bookmark[]>} bookmarks
+   */
+  function saveBookmarks(bookmarks) {
+    return saveObject('bookmarks', bookmarks);
+  }
+
   window.y9JTVCMg = {
     isEmpty,
     isNotEmpty,
     formatDate,
     h,
     i,
+    loadPins,
+    savePins,
+    loadBookmarks,
+    saveBookmarks,
   };
 })();

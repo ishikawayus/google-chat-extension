@@ -1,3 +1,16 @@
+interface Pin {
+  messageId: string;
+  timestamp: string;
+  userId: string;
+  user: string;
+  body: string;
+}
+
+interface Bookmark {
+  title: string;
+  url: string;
+}
+
 interface Window {
   y9JTVCMg: {
     isEmpty(s: string | null | undefined): boolean;
@@ -15,6 +28,10 @@ interface Window {
       children: (Element | undefined)[] | string
     ): HTMLElementTagNameMap[K];
     i(icon: string): SVGSVGElement;
+    loadPins(): Promise<Record<string, Pin[]>>;
+    savePins(pins: Record<string, Pin[]>): Promise<void>;
+    loadBookmarks(): Promise<Record<string, Bookmark[]>>;
+    saveBookmarks(bookmarks: Record<string, Bookmark[]>): Promise<void>;
   };
 }
 declare var window: Window & typeof globalThis;

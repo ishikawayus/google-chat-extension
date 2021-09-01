@@ -10,3 +10,96 @@
   background-color: rgba(97, 97, 97, 0.902);
   border-radius: 2px;
 }
+
+.dyab-bookmarks {
+  width: 100%;
+  height: 32px;
+  background-color: #fff;
+  border-bottom: solid 1px #e8eaed;
+  box-sizing: border-box;
+  padding-left: 28px;
+  display: flex;
+  align-items: center;
+}
+
+.dyab-bookmarks-button-container {
+  position: relative;
+}
+
+.dyab-bookmarks-button-container:not(:first-child) {
+  margin-left: 16px;
+}
+
+.dyab-bookmarks-button {
+  position: relative;
+  cursor: pointer;
+  font-size: 15px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+}
+
+.dyab-bookmarks-button:hover {
+  background-color: rgba(60, 64, 67, 0.078);
+}
+
+.dyab-bookmarks-button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.dyab-bookmarks-button-popover {
+  position: absolute;
+  top: 24px;
+  z-index: 100;
+  width: 400px;
+  max-height: calc(100vh - 128px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 12%), 0 1px 5px 0 rgb(0 0 0 / 20%);
+}
+
+.dyab-bookmarks-button-popover-scroll {
+  overflow-y: auto;
+}
+
+.dyab-bookmarks-button-popover-inner {
+  height: 100%;
+  background: #ccc;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.dyab-pinned {
+  background: #ff6 !important;
+}
+
+.dyab-pin {
+  padding: 8px;
+  border-radius: 4px;
+  background: #fff;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.dyab-pin:not(:first-child) {
+  margin-top: 4px;
+}
+
+.dyab-pin-head {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+.dyab-pin-head-user {
+  padding-left: 4px;
+}
+
+.dyab-pin-head-timestamp {
+  padding-left: 4px;
+  color: #999;
+}

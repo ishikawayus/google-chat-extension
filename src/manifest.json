@@ -3,6 +3,7 @@
   "name": "google-chat-extension",
   "description": "google-chat-extension",
   "version": "0.1.0",
+  "permissions": ["storage", "unlimitedStorage"],
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/chat/*"],
