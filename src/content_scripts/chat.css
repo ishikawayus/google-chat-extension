@@ -81,12 +81,25 @@
   background: #ff6 !important;
 }
 
+.dyab-pin-nodata {
+  padding: 8px;
+  border-radius: 4px;
+  background: #fff;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
 .dyab-pin {
   padding: 8px;
   border-radius: 4px;
   background: #fff;
   box-sizing: border-box;
   width: 100%;
+  cursor: pointer;
+}
+
+.dyab-pin:hover {
+  background: #f9f9f9;
 }
 
 .dyab-pin:not(:first-child) {
@@ -101,11 +114,20 @@
 
 .dyab-pin-head-user {
   padding-left: 4px;
+  cursor: pointer;
+}
+
+.dyab-pin-head-user:hover {
+  text-decoration: underline;
 }
 
 .dyab-pin-head-timestamp {
   padding-left: 4px;
   color: #999;
+}
+
+.dyab-pin-links {
+  vertical-align: bottom;
 }
 
 .dyab-dialog-background {
@@ -219,6 +241,17 @@
   height: 24px;
   padding: 8px;
   border-radius: 50%;
+}
+
+.dyab-icon-button.small {
+  width: 16px;
+  height: 16px;
+  padding: 2px;
+}
+
+.dyab-icon-button.small svg {
+  width: 16px;
+  height: 16px;
 }
 
 .dyab-button:hover,

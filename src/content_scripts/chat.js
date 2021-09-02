@@ -35,6 +35,15 @@
   }
 
   /**
+   *
+   * @param {Element} $element
+   * @param {string} attribute
+   */
+  function findAttribute($element, attribute) {
+    return $element.querySelector(`[${attribute}]`)?.getAttribute(attribute);
+  }
+
+  /**
    * @param {string} groupId
    * @param {string} messageId
    * @param {Element} $message
@@ -42,15 +51,24 @@
   async function updatePin(groupId, messageId, $message) {
     const pinsByGroupId = { ...(await loadPins()) };
     if (pinsByGroupId[groupId]?.find((pin) => pin.messageId === messageId) == null) {
-      const $user = $message.querySelector('[data-hovercard-element-id]');
-      const $timestamp = $message.querySelector('[data-absolute-timestamp]');
-      const $body = $message.querySelector('[jsname="bgckF"]');
-      const timestamp = $timestamp?.getAttribute('data-absolute-timestamp');
-      const userId = $user?.getAttribute('data-hovercard-element-id');
-      const user = $user?.getAttribute('data-name');
-      const body = $body?.textContent;
-      if (timestamp != null && userId != null && user != null && body != null) {
-        const pin = { messageId, timestamp, userId, user, body };
+      const timestamp = findAttribute($message, 'data-absolute-timestamp');
+      const userId = $message.getAttribute('data-user-id');
+      const user = findAttribute($message, 'data-name');
+      const body = $message.querySelector('[jsname="bgckF"]')?.textContent;
+      const links = /** @type {{ title: string, url: string }[]} */ ([]);
+      for (const $a of $message.querySelectorAll('[jsname="KUOBaf"] a')) {
+        const title = $a.getAttribute('title');
+        const url = $a.getAttribute('href');
+        if (title == null || url == null) {
+          console.log('Failed to get message link', messageId, title, url);
+        } else {
+          links.push({ title, url });
+        }
+      }
+      if (timestamp == null || userId == null || user == null || body == null) {
+        console.log('Failed to get message', messageId, timestamp, userId, user, body);
+      } else {
+        const pin = { messageId, timestamp, userId, user, body, links };
         pins = [...(pinsByGroupId[groupId] ?? []), pin];
         pinsByGroupId[groupId] = pins;
         await savePins(pinsByGroupId);
@@ -60,15 +78,36 @@
       pinsByGroupId[groupId] = pins;
       await savePins(pinsByGroupId);
     }
-    updatePinMessage(messageId, $message);
+    updatePinMessage(messageId);
     updatePinButton();
   }
 
   /**
    * @param {string} messageId
-   * @param {Element} $message
    */
-  function updatePinMessage(messageId, $message) {
+  async function removePin(messageId) {
+    const groupId = findAttribute(document.body, 'data-group-id');
+    if (groupId == null) {
+      console.log('Failed to get groupId', groupId);
+      return;
+    }
+    const pinsByGroupId = { ...(await loadPins()) };
+    pins = [...(pinsByGroupId[groupId] ?? [])].filter((pin) => pin.messageId !== messageId);
+    pinsByGroupId[groupId] = pins;
+    await savePins(pinsByGroupId);
+    updatePinMessage(messageId);
+    updatePinButton();
+  }
+
+  /**
+   * @param {string} messageId
+   */
+  function updatePinMessage(messageId) {
+    const $message = document.querySelector(`[jsname="Ne3sFf"][data-id="${messageId}"]`);
+    if ($message == null) {
+      console.log('Failed to get $message', messageId);
+      return;
+    }
     if (pins?.find((pin) => pin.messageId === messageId) != null) {
       $message.classList.add('dyab-pinned');
     } else {
@@ -85,15 +124,50 @@
     if ($popoverInner != null && pins != null) {
       $popoverInner.innerHTML = '';
       for (const pin of pins) {
+        const $user = h('span', { class: 'dyab-pin-head-user' }, pin.user);
+        const $closeButton = h('span', { class: `dyab-icon-button small` }, [i(closeIcon)]);
         const $div = h('div', { class: 'dyab-pin' }, [
           h('div', { class: 'dyab-pin-head' }, [
             i(accountCircleIcon),
-            h('span', { class: 'dyab-pin-head-user' }, pin.user),
+            $user,
             h('span', { class: 'dyab-pin-head-timestamp' }, formatDate(new Date(parseInt(pin.timestamp, 10)))),
+            $closeButton,
           ]),
           h('div', { class: 'dyab-pin-body' }, pin.body),
+          h(
+            'div',
+            { class: 'dyab-pin-links' },
+            pin.links.map((link) => {
+              const $button = h('span', { class: `dyab-icon-button small`, title: link.title + '\n' + link.url }, [
+                i(linkIcon),
+              ]);
+              $button.addEventListener('click', (event) => {
+                event.stopPropagation();
+                window.open(link.url, '_blank');
+              });
+              return $button;
+            })
+          ),
         ]);
         $popoverInner.appendChild($div);
+        $user.addEventListener('click', (event) => {
+          event.stopPropagation();
+          window.open(`https://contacts.google.com/person/${pin.userId}`, '_blank');
+        });
+        $closeButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          removePin(pin.messageId);
+        });
+        $div.addEventListener('click', () => {
+          const groupId = findAttribute(document.body, 'data-group-id');
+          if (groupId == null) {
+            return;
+          }
+          window.open(`https://mail.google.com/chat/#chat/${groupId}/${pin.messageId}`, '_blank');
+        });
+      }
+      if (pins.length === 0) {
+        $popoverInner.appendChild(h('div', { class: 'dyab-pin-nodata' }, 'ピン留めなし'));
       }
     }
   }
@@ -118,7 +192,7 @@
    * @param {string} bookmarkId
    */
   async function removeBookmark(bookmarkId) {
-    const groupId = document.querySelector('[data-group-id]')?.getAttribute('data-group-id');
+    const groupId = findAttribute(document.body, 'data-group-id');
     if (groupId == null) {
       return;
     }
@@ -235,7 +309,7 @@
   }
 
   async function run() {
-    const groupId = document.querySelector('[data-group-id]')?.getAttribute('data-group-id');
+    const groupId = findAttribute(document.body, 'data-group-id');
     if (groupId == null || isEmpty(groupId)) {
       return;
     }
@@ -259,7 +333,7 @@
       addLinkCopyButton(groupId, messageId, $hoverButton);
       addPinButton(groupId, messageId, $message, $hoverButton);
       addTimestampTooltip(timestamp, $timestamp);
-      updatePinMessage(messageId, $message);
+      updatePinMessage(messageId);
     }
     const $tabContainer = document.querySelector('.UDyRYe');
     if (

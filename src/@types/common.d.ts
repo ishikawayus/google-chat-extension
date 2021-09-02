@@ -4,6 +4,7 @@ interface Pin {
   userId: string;
   user: string;
   body: string;
+  links: { title: string; url: string }[];
 }
 
 interface Bookmark {
