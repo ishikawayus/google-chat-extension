@@ -77,8 +77,9 @@
   box-sizing: border-box;
 }
 
-.dyab-pinned {
-  background: #ff6 !important;
+.dyab-pinned,
+.dyab-pinned .GNlxbc {
+  background: #ffd !important;
 }
 
 .dyab-pin-nodata {
