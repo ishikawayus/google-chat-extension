@@ -48,6 +48,10 @@
   height: 15px;
 }
 
+.dyab-bookmarks-container {
+  display: flex;
+}
+
 .dyab-bookmarks-container .dyab-bookmarks-button {
   margin-left: 8px;
 }
