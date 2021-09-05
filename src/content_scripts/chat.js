@@ -1,7 +1,18 @@
 (() => {
   'use strict';
 
-  const { isEmpty, formatDate, h, i, loadPins, savePins, loadBookmarks, saveBookmarks } = window.y9JTVCMg;
+  const {
+    isEmpty,
+    formatDate,
+    h,
+    i,
+    loadPins,
+    savePins,
+    loadBookmarks,
+    saveBookmarks,
+    loadRecentlyUsedReactions,
+    saveRecentlyUsedReactions,
+  } = window.y9JTVCMg;
 
   const accountCircleIcon = `<path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM7.07 18.28c.43-.9 3.05-1.78 4.93-1.78s4.51.88 4.93 1.78C15.57 19.36 13.86 20 12 20s-3.57-.64-4.93-1.72zm11.29-1.45c-1.43-1.74-4.9-2.33-6.36-2.33s-4.93.59-6.36 2.33C4.62 15.49 4 13.82 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8c0 1.82-.62 3.49-1.64 4.83zM12 6c-1.94 0-3.5 1.56-3.5 3.5S10.06 13 12 13s3.5-1.56 3.5-3.5S13.94 6 12 6zm0 5c-.83 0-1.5-.67-1.5-1.5S11.17 8 12 8s1.5.67 1.5 1.5S12.83 11 12 11z"/>`;
   const addIcon = `<path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>`;
@@ -14,6 +25,9 @@
 
   /** @type {Bookmark[] | undefined} */
   let bookmarks;
+
+  /** @type {Reaction[] | undefined} */
+  let reactions;
 
   function uuid() {
     const format = 'RRRRRRRR-RRRR-4RRR-rRRR-RRRRRRRRRRRR';
@@ -225,6 +239,94 @@
   }
 
   /**
+   * @param {Reaction} reaction
+   */
+  async function saveReactions(reaction) {
+    reactions = (await loadRecentlyUsedReactions()).filter((r) => r.label !== reaction.label);
+    reactions.push(reaction);
+    await saveRecentlyUsedReactions(reactions);
+    updateReactionsForAllMessages();
+  }
+
+  function updateReactionsForAllMessages() {
+    if (reactions == null || reactions.length === 0) {
+      return;
+    }
+    for (const $reactionContainer of document.querySelectorAll('[jsname="OPTywb"] [jsname="me23c"]')) {
+      $reactionContainer.removeAttribute('data-m6zx');
+      updateReactions($reactionContainer);
+    }
+  }
+
+  /**
+   * @param {Reaction} reaction
+   */
+  function createReaction(reaction) {
+    return h('div', { class: 'Bx60Yc' }, [
+      h(
+        'div',
+        {
+          role: 'menuitem',
+          class: 'U26fgb mUbCce fKz7Od dtPjgd M9Bg4d',
+          jscontroller: 'RCdJKe',
+          jsaction:
+            'click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventMouseEvents=true|preventDefault=true); touchcancel:JMtRjd;',
+          jsshadow: '',
+          jsname: 'vnVdbf',
+          'aria-label': reaction.label,
+          'aria-disabled': 'false',
+          tabindex: '-1',
+          'data-emoji': reaction.label,
+        },
+        [
+          h('div', { class: 'VTBa7b MbhUzd', jsname: 'ksKsZd' }),
+          h('span', { jsslot: '', class: 'xjKiLb' }, [
+            h('span', { class: 'Ce1Y1c', style: 'top: -12px' }, [
+              h('img', {
+                'data-emoji': reaction.label,
+                class: 'iiJ4W',
+                alt: reaction.label,
+                'aria-label': reaction.label,
+                src: reaction.src,
+              }),
+            ]),
+          ]),
+        ]
+      ),
+    ]);
+  }
+
+  /**
+   * @param {Element} $reactionContainer
+   */
+  function updateReactions($reactionContainer) {
+    if (reactions == null || reactions.length === 0) {
+      return;
+    }
+    if ($reactionContainer.getAttribute('data-m6zx') != null) {
+      return;
+    }
+    const $childNodes = [...$reactionContainer.childNodes];
+    if ($childNodes.length === 0) {
+      return;
+    }
+    $reactionContainer.setAttribute('data-m6zx', '1');
+    for (let i = 0; i < $childNodes.length; i++) {
+      if (i >= reactions.length) {
+        break;
+      }
+      const $reaction = $childNodes[i];
+      const reaction = reactions[reactions.length - i - 1];
+      if (!($reaction instanceof Element) || reaction == null) {
+        console.log('Failed to get $reaction or reaction', $reaction, reaction, i);
+        break;
+      }
+      $reactionContainer.insertBefore(createReaction(reaction), $reaction);
+      $reaction.remove();
+    }
+  }
+
+  /**
    * @param {Element} $button
    * @param {string} icon
    * @param {string} label
@@ -319,6 +421,9 @@
     if (bookmarks == null) {
       bookmarks = (await loadBookmarks())?.[groupId] ?? [];
     }
+    if (reactions == null) {
+      reactions = (await loadRecentlyUsedReactions()) ?? [];
+    }
     for (const $message of document.querySelectorAll('[jsname="Ne3sFf"]')) {
       const messageId = $message.getAttribute('data-id');
       if (messageId == null || isEmpty(messageId) || $message.querySelector('[data-zvhq]') != null) {
@@ -334,6 +439,22 @@
       addPinButton(groupId, messageId, $message, $hoverButton);
       addTimestampTooltip(timestamp, $timestamp);
       updatePinMessage(messageId);
+    }
+    for (const $reactionContainer of document.querySelectorAll('[jsname="OPTywb"] [jsname="me23c"]')) {
+      updateReactions($reactionContainer);
+    }
+    for (const $reaction of document.querySelectorAll('[jsname="vnVdbf"]')) {
+      if ($reaction.getAttribute('data-u4br') == null) {
+        $reaction.setAttribute('data-u4br', '1');
+        $reaction.addEventListener('click', () => {
+          const $reactionImg = $reaction.querySelector('img');
+          const label = $reactionImg?.getAttribute('aria-label');
+          const src = $reactionImg?.getAttribute('src');
+          if (label != null && src != null) {
+            saveReactions({ label, src });
+          }
+        });
+      }
     }
     const $tabContainer = document.querySelector('.UDyRYe');
     if (

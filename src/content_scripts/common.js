@@ -138,6 +138,20 @@
     return saveObject('bookmarks', bookmarks);
   }
 
+  /**
+   * @returns {Promise<Reaction[]>}
+   */
+  async function loadRecentlyUsedReactions() {
+    return (await loadObject('recentlyUsedReactions')) ?? [];
+  }
+
+  /**
+   * @param {Reaction[]} reactions
+   */
+  function saveRecentlyUsedReactions(reactions) {
+    return saveObject('recentlyUsedReactions', reactions);
+  }
+
   window.y9JTVCMg = {
     isEmpty,
     isNotEmpty,
@@ -148,5 +162,7 @@
     savePins,
     loadBookmarks,
     saveBookmarks,
+    loadRecentlyUsedReactions,
+    saveRecentlyUsedReactions,
   };
 })();

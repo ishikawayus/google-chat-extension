@@ -13,6 +13,11 @@ interface Bookmark {
   url: string;
 }
 
+interface Reaction {
+  label: string;
+  src: string;
+}
+
 interface Window {
   y9JTVCMg: {
     isEmpty(s: string | null | undefined): boolean;
@@ -34,6 +39,8 @@ interface Window {
     savePins(pins: Record<string, Pin[]>): Promise<void>;
     loadBookmarks(): Promise<Record<string, Bookmark[]>>;
     saveBookmarks(bookmarks: Record<string, Bookmark[]>): Promise<void>;
+    loadRecentlyUsedReactions(): Promise<Reaction[]>;
+    saveRecentlyUsedReactions(reactions: Reaction[]): Promise<void>;
   };
 }
 declare var window: Window & typeof globalThis;
