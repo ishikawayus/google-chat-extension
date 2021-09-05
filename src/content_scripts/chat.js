@@ -2,7 +2,6 @@
   'use strict';
 
   const {
-    isEmpty,
     formatDate,
     h,
     i,
@@ -74,13 +73,13 @@
         const title = $a.getAttribute('title');
         const url = $a.getAttribute('href');
         if (title == null || url == null) {
-          console.log('Failed to get message link', messageId, title, url);
+          console.error('Failed to get message link', messageId, title, url);
         } else {
           links.push({ title, url });
         }
       }
       if (timestamp == null || userId == null || user == null || body == null) {
-        console.log('Failed to get message', messageId, timestamp, userId, user, body);
+        console.error('Failed to get message', messageId, timestamp, userId, user, body);
       } else {
         const pin = { messageId, timestamp, userId, user, body, links };
         pins = [...(pinsByGroupId[groupId] ?? []), pin];
@@ -102,7 +101,7 @@
   async function removePin(messageId) {
     const groupId = findAttribute(document.body, 'data-group-id');
     if (groupId == null) {
-      console.log('Failed to get groupId', groupId);
+      console.error('Failed to get groupId', groupId);
       return;
     }
     const pinsByGroupId = { ...(await loadPins()) };
@@ -119,7 +118,7 @@
   function updatePinMessage(messageId) {
     const $message = document.querySelector(`[jsname="Ne3sFf"][data-id="${messageId}"]`);
     if ($message == null) {
-      console.log('Failed to get $message', messageId);
+      console.error('Failed to get $message', messageId);
       return;
     }
     if (pins?.find((pin) => pin.messageId === messageId) != null) {
@@ -253,8 +252,7 @@
       return;
     }
     for (const $reactionContainer of document.querySelectorAll('[jsname="OPTywb"] [jsname="me23c"]')) {
-      $reactionContainer.removeAttribute('data-m6zx');
-      updateReactions($reactionContainer);
+      addRecentlyUsedReactions($reactionContainer);
     }
   }
 
@@ -299,18 +297,16 @@
   /**
    * @param {Element} $reactionContainer
    */
-  function updateReactions($reactionContainer) {
+  function addRecentlyUsedReactions($reactionContainer) {
     if (reactions == null || reactions.length === 0) {
-      return;
-    }
-    if ($reactionContainer.getAttribute('data-m6zx') != null) {
       return;
     }
     const $childNodes = [...$reactionContainer.childNodes];
     if ($childNodes.length === 0) {
+      // Wait to load reactions
+      requestAnimationFrame(() => addRecentlyUsedReactions($reactionContainer));
       return;
     }
-    $reactionContainer.setAttribute('data-m6zx', '1');
     for (let i = 0; i < $childNodes.length; i++) {
       if (i >= reactions.length) {
         break;
@@ -318,7 +314,7 @@
       const $reaction = $childNodes[i];
       const reaction = reactions[reactions.length - i - 1];
       if (!($reaction instanceof Element) || reaction == null) {
-        console.log('Failed to get $reaction or reaction', $reaction, reaction, i);
+        console.error('Failed to get $reaction or reaction', $reaction, reaction, i);
         break;
       }
       $reactionContainer.insertBefore(createReaction(reaction), $reaction);
@@ -339,7 +335,6 @@
     $newHoverButton.removeAttribute('jsname');
     $newHoverButton.removeAttribute('jslog');
     $newHoverButton.removeAttribute('data-id');
-    $newHoverButton.setAttribute('data-zvhq', 'true');
     $newHoverButton.setAttribute('aria-label', label);
     $newHoverButton.setAttribute('data-tooltip', label);
     const $newHoverButtonSvg = $newHoverButton.querySelector('svg');
@@ -350,58 +345,88 @@
   }
 
   /**
-   * @param {string} groupId
-   * @param {string} messageId
-   * @param {Element} $hoverButton
+   * @param {Element} $hoverButtonContainer
    */
-  function addLinkCopyButton(groupId, messageId, $hoverButton) {
-    if ($hoverButton == null || $hoverButton.parentElement == null) {
+  function addLinkCopyButton($hoverButtonContainer) {
+    const $baseHoverButton = $hoverButtonContainer.querySelector('[jsname="MLuah"]');
+    if ($baseHoverButton == null) {
+      console.error('Failed to get $baseHoverButton', $hoverButtonContainer);
       return;
     }
-    const $newHoverButton = cloneHoverButton($hoverButton, linkIcon, 'リンクをコピー');
-    $hoverButton.parentElement.appendChild($newHoverButton);
-    $newHoverButton.addEventListener('click', () => {
-      const $input = document.createElement('input');
-      $input.value = `https://mail.google.com/chat/#chat/${groupId}/${messageId}`;
-      $input.setAttribute('style', 'position: fixed; right: 200%');
-      document.body.appendChild($input);
-      $input.select();
-      document.execCommand('copy');
-      $input.remove();
-    });
+    const $newHoverButton = cloneHoverButton($baseHoverButton, linkIcon, 'リンクをコピー');
+    $hoverButtonContainer.appendChild($newHoverButton);
+    $newHoverButton.addEventListener('click', () => onLinkCopyButtonClick($newHoverButton));
   }
 
   /**
-   * @param {string} groupId
-   * @param {string} messageId
-   * @param {Element} $message
    * @param {Element} $hoverButton
    */
-  function addPinButton(groupId, messageId, $message, $hoverButton) {
-    if ($hoverButton == null || $hoverButton.parentElement == null) {
+  function onLinkCopyButtonClick($hoverButton) {
+    const groupId = findAttribute(document.body, 'data-group-id');
+    const messageId = $hoverButton.closest('[jsname="Ne3sFf"]')?.getAttribute('data-id');
+    if (groupId == null || messageId == null) {
+      console.error('Failed to get groupId or messageId', $hoverButton, groupId, messageId);
       return;
     }
-    const $newHoverButton = cloneHoverButton($hoverButton, pushPinIcon, 'ピン留めを変更');
-    $hoverButton.parentElement.appendChild($newHoverButton);
-    $newHoverButton.addEventListener('click', () => {
-      updatePin(groupId, messageId, $message);
-    });
+    const $input = document.createElement('input');
+    $input.value = `https://mail.google.com/chat/#chat/${groupId}/${messageId}`;
+    $input.setAttribute('style', 'position: fixed; right: 200%');
+    document.body.appendChild($input);
+    $input.select();
+    document.execCommand('copy');
+    $input.remove();
   }
 
   /**
-   *
-   * @param {string} timestamp
-   * @param {Element} $timestamp
-   * @returns
+   * @param {Element} $hoverButtonContainer
    */
-  function addTimestampTooltip(timestamp, $timestamp) {
-    if ($timestamp.parentElement == null) {
+  function addPinButton($hoverButtonContainer) {
+    const $baseHoverButton = $hoverButtonContainer.querySelector('[jsname="MLuah"]');
+    if ($baseHoverButton == null) {
+      console.error('Failed to get $baseHoverButton', $hoverButtonContainer);
+      return;
+    }
+    const $newHoverButton = cloneHoverButton($baseHoverButton, pushPinIcon, 'ピン留めを変更');
+    $hoverButtonContainer.appendChild($newHoverButton);
+    $newHoverButton.addEventListener('click', () => onPinButtonClick($newHoverButton));
+  }
+
+  /**
+   * @param {Element} $hoverButton
+   */
+  function onPinButtonClick($hoverButton) {
+    const groupId = findAttribute(document.body, 'data-group-id');
+    const $message = $hoverButton.closest('[jsname="Ne3sFf"]');
+    const messageId = $message?.getAttribute('data-id');
+    if (groupId == null || $message == null || messageId == null) {
+      console.error('Failed to get groupId, $message or messageId', $hoverButton, groupId, $message, messageId);
+      return;
+    }
+    updatePin(groupId, messageId, $message);
+  }
+
+  /**
+   * @param {Element} $timestampContainer
+   */
+  function addTimestampTooltip($timestampContainer) {
+    if (!($timestampContainer instanceof HTMLElement)) {
+      console.error('Failed to get $timestampContainer', $timestampContainer);
+      return;
+    }
+    const $timestamp = $timestampContainer.querySelector('[jsname="E53oB"]');
+    if ($timestamp == null) {
+      console.error('Failed to get $timestamp', $timestampContainer);
+      return;
+    }
+    const timestamp = $timestamp.getAttribute('data-absolute-timestamp');
+    if (timestamp == null) {
+      console.error('Failed to get timestamp', $timestamp);
       return;
     }
     const date = new Date(parseInt(timestamp, 10));
     const $timestampTooltip = h('div', { class: 'zvhq-tooltip', style: 'display: none' }, formatDate(date));
-    $timestamp.parentElement.style.position = 'relative';
-    $timestamp.parentElement.appendChild($timestampTooltip);
+    $timestampContainer.style.position = 'relative';
+    $timestampContainer.appendChild($timestampTooltip);
     $timestamp.addEventListener('mouseenter', () => {
       $timestampTooltip.style.display = '';
     });
@@ -410,123 +435,166 @@
     });
   }
 
-  async function run() {
-    const groupId = findAttribute(document.body, 'data-group-id');
-    if (groupId == null || isEmpty(groupId)) {
+  /**
+   * @param {Element} $message
+   */
+  function addPinState($message) {
+    const messageId = $message.getAttribute('data-id');
+    if (messageId == null) {
+      console.error('Failed to get messageId', $message);
       return;
     }
-    if (pins == null) {
-      pins = (await loadPins())?.[groupId] ?? [];
-    }
-    if (bookmarks == null) {
-      bookmarks = (await loadBookmarks())?.[groupId] ?? [];
-    }
-    if (reactions == null) {
-      reactions = (await loadRecentlyUsedReactions()) ?? [];
-    }
-    for (const $message of document.querySelectorAll('[jsname="Ne3sFf"]')) {
-      const messageId = $message.getAttribute('data-id');
-      if (messageId == null || isEmpty(messageId) || $message.querySelector('[data-zvhq]') != null) {
-        continue;
-      }
-      const $hoverButton = $message.querySelector('[jsname="MLuah"]');
-      const $timestamp = $message.querySelector('[data-absolute-timestamp]');
-      const timestamp = $timestamp?.getAttribute('data-absolute-timestamp');
-      if ($hoverButton == null || $timestamp == null || timestamp == null) {
-        continue;
-      }
-      addLinkCopyButton(groupId, messageId, $hoverButton);
-      addPinButton(groupId, messageId, $message, $hoverButton);
-      addTimestampTooltip(timestamp, $timestamp);
-      updatePinMessage(messageId);
-    }
-    for (const $reactionContainer of document.querySelectorAll('[jsname="OPTywb"] [jsname="me23c"]')) {
-      updateReactions($reactionContainer);
-    }
-    for (const $reaction of document.querySelectorAll('[jsname="vnVdbf"]')) {
-      if ($reaction.getAttribute('data-u4br') == null) {
-        $reaction.setAttribute('data-u4br', '1');
-        $reaction.addEventListener('click', () => {
-          const $reactionImg = $reaction.querySelector('img');
-          const label = $reactionImg?.getAttribute('aria-label');
-          const src = $reactionImg?.getAttribute('src');
-          if (label != null && src != null) {
-            saveReactions({ label, src });
-          }
-        });
-      }
-    }
-    const $tabContainer = document.querySelector('.UDyRYe');
-    if (
-      $tabContainer != null &&
-      $tabContainer.parentElement != null &&
-      $tabContainer.parentElement.querySelector('[data-dyab]') == null
-    ) {
-      const $pinButton = h('div', { class: 'dyab-bookmarks-button' }, [i(pushPinIcon), h('span')]);
-      const $pinPopover = h('div', { class: 'dyab-bookmarks-button-popover', style: 'display: none' }, [
-        h('div', { class: 'dyab-bookmarks-button-popover-scroll' }, [
-          h('div', { class: 'dyab-bookmarks-button-popover-inner' }),
-        ]),
-      ]);
-      const $addButton = h('div', { class: 'dyab-bookmarks-button' }, [i(addIcon), h('span', '関連ページを追加')]);
-      const $bookmarkContainer = h('div', { class: 'dyab-bookmarks', 'data-dyab': 'true' }, [
-        h('div', { class: 'dyab-bookmarks-button-container' }, [$pinButton, $pinPopover]),
-        h('div', { class: 'dyab-bookmarks-container' }),
-        h('div', { class: 'dyab-bookmarks-button-container' }, [$addButton]),
-      ]);
-      $tabContainer.parentElement.insertBefore($bookmarkContainer, $tabContainer.nextElementSibling);
-      $pinButton.addEventListener('click', () => {
-        $pinPopover.style.display = $pinPopover.style.display === 'none' ? '' : 'none';
-      });
-      updatePinButton();
+    updatePinMessage(messageId);
+  }
 
-      const $bookmarkDialogTitle = h('input', { class: 'dyab-bookmark-dialog-title' });
-      const $bookmarkDialogUrl = h('input', { class: 'dyab-bookmark-dialog-url' });
-      const $bookmarkDialogCloseButton = h('div', { class: `dyab-icon-button` }, [i(closeIcon)]);
-      const $bookmarkDialogSaveButton = h('div', { class: `dyab-button` }, '保存');
+  /**
+   * @param {Element} $reaction
+   */
+  function addRecentlyUsedReactionListener($reaction) {
+    $reaction.addEventListener('click', () => onReactionClick($reaction));
+  }
 
-      const $bookmarkDialog = h('div', { class: 'dyab-dialog' }, [
-        h('div', { class: 'dyab-dialog-header' }, [
-          h('div', '関連ページを保存'),
-          h('div', { class: 'dyab-pull-right' }, [$bookmarkDialogCloseButton]),
-        ]),
-        h('div', { class: 'dyab-dialog-body' }, [
-          h('div', { class: 'dyab-form-control' }, [h('label', 'タイトル'), h('div', [$bookmarkDialogTitle])]),
-          h('div', { class: 'dyab-form-control' }, [h('label', 'URL'), h('div', [$bookmarkDialogUrl])]),
-        ]),
-        h('div', { class: 'dyab-dialog-footer' }, [
-          h('div', { class: 'dyab-pull-right' }, [$bookmarkDialogSaveButton]),
-        ]),
-      ]);
-      const $bookmarkDialogBackground = h('div', { class: `dyab-dialog-background`, style: 'display: none' }, [
-        h('div', { class: `dyab-dialog-container` }, [$bookmarkDialog]),
-      ]);
-      document.body.appendChild(h('div', [$bookmarkDialogBackground]));
-      $addButton.addEventListener('click', () => {
-        $bookmarkDialogTitle.value = '';
-        $bookmarkDialogUrl.value = '';
-        $bookmarkDialogBackground.style.display = '';
-      });
-      $bookmarkDialogBackground.addEventListener('click', (event) => {
-        if (event.target instanceof Node && !$bookmarkDialog.contains(event.target)) {
-          $bookmarkDialogBackground.style.display = 'none';
-        }
-      });
-      $bookmarkDialogCloseButton.addEventListener('click', () => {
-        $bookmarkDialogBackground.style.display = 'none';
-      });
-      $bookmarkDialogSaveButton.addEventListener('click', () => {
-        saveBookmark(groupId);
-        $bookmarkDialogBackground.style.display = 'none';
-      });
-
-      updateBookmarks();
+  /**
+   * @param {Element} $reaction
+   */
+  function onReactionClick($reaction) {
+    const $reactionImg = $reaction.querySelector('img');
+    const label = $reactionImg?.getAttribute('aria-label');
+    const src = $reactionImg?.getAttribute('src');
+    if (label != null && src != null) {
+      saveReactions({ label, src });
     }
   }
 
-  (() => {
-    run();
-    const observer = new MutationObserver(() => run());
-    observer.observe(document.body, { childList: true, subtree: true });
+  /**
+   * @param {Element} $tabContainer
+   */
+  function addPinBar($tabContainer) {
+    if ($tabContainer.parentElement == null) {
+      console.error('Failed to get $tabContainer.parentElement', $tabContainer);
+      return;
+    }
+
+    const $pinButton = h('div', { class: 'dyab-bookmarks-button' }, [i(pushPinIcon), h('span')]);
+    const $pinPopover = h('div', { class: 'dyab-bookmarks-button-popover', style: 'display: none' }, [
+      h('div', { class: 'dyab-bookmarks-button-popover-scroll' }, [
+        h('div', { class: 'dyab-bookmarks-button-popover-inner' }),
+      ]),
+    ]);
+    const $addButton = h('div', { class: 'dyab-bookmarks-button' }, [i(addIcon), h('span', '関連ページを追加')]);
+    const $bookmarkContainer = h('div', { class: 'dyab-bookmarks' }, [
+      h('div', { class: 'dyab-bookmarks-button-container' }, [$pinButton, $pinPopover]),
+      h('div', { class: 'dyab-bookmarks-container' }),
+      h('div', { class: 'dyab-bookmarks-button-container' }, [$addButton]),
+    ]);
+    $tabContainer.parentElement.insertBefore($bookmarkContainer, $tabContainer.nextElementSibling);
+    $pinButton.addEventListener('click', () => {
+      $pinPopover.style.display = $pinPopover.style.display === 'none' ? '' : 'none';
+    });
+    updatePinButton();
+
+    const $bookmarkDialogTitle = h('input', { class: 'dyab-bookmark-dialog-title' });
+    const $bookmarkDialogUrl = h('input', { class: 'dyab-bookmark-dialog-url' });
+    const $bookmarkDialogCloseButton = h('div', { class: `dyab-icon-button` }, [i(closeIcon)]);
+    const $bookmarkDialogSaveButton = h('div', { class: `dyab-button` }, '保存');
+
+    const $bookmarkDialog = h('div', { class: 'dyab-dialog' }, [
+      h('div', { class: 'dyab-dialog-header' }, [
+        h('div', '関連ページを保存'),
+        h('div', { class: 'dyab-pull-right' }, [$bookmarkDialogCloseButton]),
+      ]),
+      h('div', { class: 'dyab-dialog-body' }, [
+        h('div', { class: 'dyab-form-control' }, [h('label', 'タイトル'), h('div', [$bookmarkDialogTitle])]),
+        h('div', { class: 'dyab-form-control' }, [h('label', 'URL'), h('div', [$bookmarkDialogUrl])]),
+      ]),
+      h('div', { class: 'dyab-dialog-footer' }, [h('div', { class: 'dyab-pull-right' }, [$bookmarkDialogSaveButton])]),
+    ]);
+    const $bookmarkDialogBackground = h('div', { class: `dyab-dialog-background`, style: 'display: none' }, [
+      h('div', { class: `dyab-dialog-container` }, [$bookmarkDialog]),
+    ]);
+    document.body.appendChild(h('div', [$bookmarkDialogBackground]));
+    $addButton.addEventListener('click', () => {
+      $bookmarkDialogTitle.value = '';
+      $bookmarkDialogUrl.value = '';
+      $bookmarkDialogBackground.style.display = '';
+    });
+    $bookmarkDialogBackground.addEventListener('click', (event) => {
+      if (event.target instanceof Node && !$bookmarkDialog.contains(event.target)) {
+        $bookmarkDialogBackground.style.display = 'none';
+      }
+    });
+    $bookmarkDialogCloseButton.addEventListener('click', () => {
+      $bookmarkDialogBackground.style.display = 'none';
+    });
+    $bookmarkDialogSaveButton.addEventListener('click', () => {
+      const groupId = findAttribute(document.body, 'data-group-id');
+      if (groupId != null) {
+        saveBookmark(groupId);
+      }
+      $bookmarkDialogBackground.style.display = 'none';
+    });
+
+    updateBookmarks();
+  }
+
+  (async () => {
+    const callbacksBySelector =
+      /** @type {{ [selector: string]: { callbacks: (($element: Element) => void)[], touched: Set<Element> }}} */ ({});
+
+    /**
+     * @param {string} selector
+     * @param {($element: Element) => void} callback
+     */
+    function addCallback(selector, callback) {
+      callbacksBySelector[selector] ??= { callbacks: [], touched: new Set() };
+      callbacksBySelector[selector]?.callbacks.push(callback);
+    }
+
+    function runCallback() {
+      for (const [selector, { callbacks, touched }] of Object.entries(callbacksBySelector)) {
+        for (const $element of document.querySelectorAll(selector)) {
+          if (!touched.has($element)) {
+            touched.add($element);
+            for (const callback of callbacks) {
+              callback($element);
+            }
+          }
+        }
+      }
+    }
+
+    let handle = 0;
+    function requestToRunCallback() {
+      cancelAnimationFrame(handle);
+      handle = requestAnimationFrame(() => runCallback());
+    }
+
+    new MutationObserver(requestToRunCallback).observe(document.body, { childList: true, subtree: true });
+
+    /**
+     * @param {Element} $container
+     * @returns
+     */
+    async function loadInitialData($container) {
+      const groupId = $container.getAttribute('data-group-id');
+      if (groupId == null) {
+        return;
+      }
+      pins = (await loadPins())?.[groupId] ?? [];
+      bookmarks = (await loadBookmarks())?.[groupId] ?? [];
+      reactions = (await loadRecentlyUsedReactions()) ?? [];
+
+      addCallback('.b8Cb3d', addTimestampTooltip);
+      addCallback('[jsname="jpbBj"]', addLinkCopyButton);
+      addCallback('[jsname="jpbBj"]', addPinButton);
+      addCallback('[jsname="Ne3sFf"]', addPinState);
+      addCallback('.UDyRYe', addPinBar);
+      addCallback('[jsname="OPTywb"] [jsname="me23c"]', addRecentlyUsedReactions);
+      addCallback('[jsname="vnVdbf"]', addRecentlyUsedReactionListener);
+      runCallback();
+    }
+
+    addCallback('[data-group-id]', loadInitialData);
+    runCallback();
   })();
 })();
