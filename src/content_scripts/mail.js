@@ -164,7 +164,7 @@
     ]);
 
     $formContainer.appendChild(h('div', { class: 'yqwh-button-container' }, [$searchButton]));
-    document.body.appendChild(h('div', [$dialogBackground]));
+    document.querySelector('.gb_Jd.gb_3d.gb_Sd')?.appendChild(h('div', [$dialogBackground]));
 
     $formContainer.style.display = 'flex';
     $form.style.flexGrow = '1';

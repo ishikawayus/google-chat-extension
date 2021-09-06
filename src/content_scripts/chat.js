@@ -558,7 +558,7 @@
     const $bookmarkDialogBackground = h('div', { class: `dyab-dialog-background`, style: 'display: none' }, [
       h('div', { class: `dyab-dialog-container` }, [$bookmarkDialog]),
     ]);
-    document.body.appendChild(h('div', [$bookmarkDialogBackground]));
+    document.querySelector('[jsname="a9kxte"]')?.appendChild(h('div', [$bookmarkDialogBackground]));
     $addButton.addEventListener('click', () => {
       $bookmarkDialogTitle.value = '';
       $bookmarkDialogUrl.value = '';
