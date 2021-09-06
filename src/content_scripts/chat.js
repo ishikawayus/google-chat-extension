@@ -467,6 +467,35 @@
   }
 
   /**
+   * @param {'click' | 'contextmenu'} type
+   * @param {HTMLElement} $button
+   * @param {HTMLElement} $popover
+   */
+  function enablePopover(type, $button, $popover) {
+    /**
+     * @param {MouseEvent} event
+     */
+    function onClick(event) {
+      if (
+        event.target instanceof Element &&
+        event.target !== $button &&
+        event.target !== $popover &&
+        !$button.contains(event.target) &&
+        !$popover.contains(event.target)
+      ) {
+        $popover.style.display = 'none';
+        document.removeEventListener('click', onClick);
+      }
+    }
+    $button.addEventListener(type, () => {
+      if ($popover.style.display === 'none') {
+        $popover.style.display = '';
+        document.addEventListener('click', onClick);
+      }
+    });
+  }
+
+  /**
    * @param {Element} $tabContainer
    */
   function addPinBar($tabContainer) {
@@ -488,9 +517,7 @@
       h('div', { class: 'dyab-bookmarks-button-container' }, [$addButton]),
     ]);
     $tabContainer.parentElement.insertBefore($bookmarkContainer, $tabContainer.nextElementSibling);
-    $pinButton.addEventListener('click', () => {
-      $pinPopover.style.display = $pinPopover.style.display === 'none' ? '' : 'none';
-    });
+    enablePopover('click', $pinButton, $pinPopover);
     updatePinButton();
 
     const $bookmarkDialogTitle = h('input', { class: 'dyab-bookmark-dialog-title' });
