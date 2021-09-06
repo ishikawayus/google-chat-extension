@@ -583,7 +583,7 @@
       addCallback('.b8Cb3d', addTimestampTooltip);
       addCallback('[jsname="jpbBj"]', addLinkCopyButton);
       addCallback('[jsname="jpbBj"]', addPinButton);
-      addCallback('[jsname="Ne3sFf"]', addPinState);
+      addCallback('[jsname="Ne3sFf"][data-id]', addPinState);
       addCallback('.UDyRYe', addPinBar);
       addCallback('[jsname="OPTywb"] [jsname="me23c"]', addRecentlyUsedReactions);
       addCallback('[jsname="vnVdbf"]', addRecentlyUsedReactionListener);
