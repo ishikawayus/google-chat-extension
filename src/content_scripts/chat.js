@@ -225,14 +225,25 @@
           i(linkIcon),
           h('span', bookmark.title),
         ]);
+        const $removeButton = h('div', { class: 'dyab-bookmarks-button-menu-button' }, '削除');
+        const $copyButton = h('div', { class: 'dyab-bookmarks-button-menu-button' }, 'リンクをコピー');
+        const $buttonMenu = h('div', { class: 'dyab-bookmarks-button-menu', style: 'display: none' }, [
+          $removeButton,
+          $copyButton,
+        ]);
         $button.addEventListener('click', () => {
           window.open(bookmark.url, '_blank');
         });
-        $button.addEventListener('contextmenu', (event) => {
-          event.preventDefault();
+        $removeButton.addEventListener('click', () => {
           removeBookmark(bookmark.id);
+          $buttonMenu.style.display = 'none';
         });
-        $container.appendChild($button);
+        $copyButton.addEventListener('click', () => {
+          copy(bookmark.url);
+          $buttonMenu.style.display = 'none';
+        });
+        enablePopover('contextmenu', $button, $buttonMenu);
+        $container.appendChild(h('div', { class: 'dyab-bookmarks-button-container' }, [$button, $buttonMenu]));
       }
     }
   }
@@ -359,6 +370,19 @@
   }
 
   /**
+   * @param {string} s
+   */
+  function copy(s) {
+    const $input = document.createElement('input');
+    $input.value = s;
+    $input.setAttribute('style', 'position: fixed; right: 200%');
+    document.body.appendChild($input);
+    $input.select();
+    document.execCommand('copy');
+    $input.remove();
+  }
+
+  /**
    * @param {Element} $hoverButton
    */
   function onLinkCopyButtonClick($hoverButton) {
@@ -368,13 +392,7 @@
       console.error('Failed to get groupId or messageId', $hoverButton, groupId, messageId);
       return;
     }
-    const $input = document.createElement('input');
-    $input.value = `https://mail.google.com/chat/#chat/${groupId}/${messageId}`;
-    $input.setAttribute('style', 'position: fixed; right: 200%');
-    document.body.appendChild($input);
-    $input.select();
-    document.execCommand('copy');
-    $input.remove();
+    copy(`https://mail.google.com/chat/#chat/${groupId}/${messageId}`);
   }
 
   /**
@@ -487,8 +505,9 @@
         document.removeEventListener('click', onClick);
       }
     }
-    $button.addEventListener(type, () => {
+    $button.addEventListener(type, (event) => {
       if ($popover.style.display === 'none') {
+        event.preventDefault();
         $popover.style.display = '';
         document.addEventListener('click', onClick);
       }
