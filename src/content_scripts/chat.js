@@ -566,18 +566,15 @@
     let handle = 0;
     function requestToRunCallback() {
       cancelAnimationFrame(handle);
-      handle = requestAnimationFrame(() => runCallback());
+      handle = requestAnimationFrame(runCallback);
     }
 
     new MutationObserver(requestToRunCallback).observe(document.body, { childList: true, subtree: true });
 
-    /**
-     * @param {Element} $container
-     * @returns
-     */
-    async function loadInitialData($container) {
-      const groupId = $container.getAttribute('data-group-id');
+    async function loadInitialData() {
+      const groupId = findAttribute(document.body, 'data-group-id');
       if (groupId == null) {
+        requestAnimationFrame(loadInitialData);
         return;
       }
       pins = (await loadPins())?.[groupId] ?? [];
@@ -593,8 +590,6 @@
       addCallback('[jsname="vnVdbf"]', addRecentlyUsedReactionListener);
       runCallback();
     }
-
-    addCallback('[data-group-id]', loadInitialData);
-    runCallback();
+    loadInitialData();
   })();
 })();
