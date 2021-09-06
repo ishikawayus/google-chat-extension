@@ -569,14 +569,13 @@
       handle = requestAnimationFrame(runCallback);
     }
 
-    new MutationObserver(requestToRunCallback).observe(document.body, { childList: true, subtree: true });
-
     async function loadInitialData() {
       const groupId = findAttribute(document.body, 'data-group-id');
       if (groupId == null) {
         requestAnimationFrame(loadInitialData);
         return;
       }
+
       pins = (await loadPins())?.[groupId] ?? [];
       bookmarks = (await loadBookmarks())?.[groupId] ?? [];
       reactions = (await loadRecentlyUsedReactions()) ?? [];
@@ -588,7 +587,9 @@
       addCallback('.UDyRYe', addPinBar);
       addCallback('[jsname="OPTywb"] [jsname="me23c"]', addRecentlyUsedReactions);
       addCallback('[jsname="vnVdbf"]', addRecentlyUsedReactionListener);
-      runCallback();
+
+      requestToRunCallback();
+      new MutationObserver(requestToRunCallback).observe(document.body, { childList: true, subtree: true });
     }
     loadInitialData();
   })();
