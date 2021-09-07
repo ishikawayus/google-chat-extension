@@ -106,7 +106,12 @@
 
 .dyab-pinned,
 .dyab-pinned .GNlxbc {
-  background: var(--badge-background-color) !important;
+  background: #ffd !important;
+}
+
+[data-theme='dark'] .dyab-pinned,
+[data-theme='dark'] .dyab-pinned .GNlxbc {
+  background: #332 !important;
 }
 
 .dyab-pin-nodata {
