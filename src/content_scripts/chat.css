@@ -298,3 +298,7 @@
 .dyab-icon-button:hover {
   background-color: var(--button-hover-color);
 }
+
+.l9H1ve {
+  height: calc(100% - 33px - 32px) !important;
+}
