@@ -16,5 +16,6 @@
       "css": ["content_scripts/chat.css"],
       "js": ["content_scripts/common.js", "content_scripts/chat.js"]
     }
-  ]
+  ],
+  "options_page": "options_page/options.html"
 }

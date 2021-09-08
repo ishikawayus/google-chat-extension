@@ -20,6 +20,7 @@ interface Reaction {
 
 interface Window {
   y9JTVCMg: {
+    i18n(key: string, ...args: unknown[]): string;
     isEmpty(s: string | null | undefined): boolean;
     isNotEmpty(s: string | null | undefined): s is string;
     formatDate(date: Date): string;
@@ -35,6 +36,8 @@ interface Window {
       children: (Element | undefined)[] | string
     ): HTMLElementTagNameMap[K];
     i(icon: string): SVGSVGElement;
+    loadLocale(): Promise<'en' | 'ja'>;
+    saveLocale(locale: 'en' | 'ja'): Promise<void>;
     loadPins(): Promise<Record<string, Pin[]>>;
     savePins(pins: Record<string, Pin[]>): Promise<void>;
     loadBookmarks(): Promise<Record<string, Bookmark[]>>;

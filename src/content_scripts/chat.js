@@ -2,6 +2,7 @@
   'use strict';
 
   const {
+    i18n,
     formatDate,
     h,
     i,
@@ -131,7 +132,7 @@
   function updatePinButton() {
     const $buttonSpan = document.querySelector('.dyab-bookmarks-button span');
     if ($buttonSpan != null) {
-      $buttonSpan.textContent = (pins?.length ?? '?') + 'ピン留め';
+      $buttonSpan.textContent = i18n('pinnedCount', pins?.length ?? '?');
     }
     const $popoverInner = document.querySelector('.dyab-bookmarks-button-popover-inner');
     if ($popoverInner != null && pins != null) {
@@ -180,7 +181,7 @@
         });
       }
       if (pins.length === 0) {
-        $popoverInner.appendChild(h('div', { class: 'dyab-pin-nodata' }, 'ピン留めなし'));
+        $popoverInner.appendChild(h('div', { class: 'dyab-pin-nodata' }, i18n('noPinned')));
       }
     }
   }
@@ -225,8 +226,8 @@
           i(linkIcon),
           h('span', bookmark.title),
         ]);
-        const $removeButton = h('div', { class: 'dyab-bookmarks-button-menu-button' }, '削除');
-        const $copyButton = h('div', { class: 'dyab-bookmarks-button-menu-button' }, 'リンクをコピー');
+        const $removeButton = h('div', { class: 'dyab-bookmarks-button-menu-button' }, i18n('remove'));
+        const $copyButton = h('div', { class: 'dyab-bookmarks-button-menu-button' }, i18n('copyLink'));
         const $buttonMenu = h('div', { class: 'dyab-bookmarks-button-menu', style: 'display: none' }, [
           $removeButton,
           $copyButton,
@@ -364,7 +365,7 @@
       console.error('Failed to get $baseHoverButton', $hoverButtonContainer);
       return;
     }
-    const $newHoverButton = cloneHoverButton($baseHoverButton, linkIcon, 'リンクをコピー');
+    const $newHoverButton = cloneHoverButton($baseHoverButton, linkIcon, i18n('copyLink'));
     $hoverButtonContainer.appendChild($newHoverButton);
     $newHoverButton.addEventListener('click', () => onLinkCopyButtonClick($newHoverButton));
   }
@@ -404,7 +405,7 @@
       console.error('Failed to get $baseHoverButton', $hoverButtonContainer);
       return;
     }
-    const $newHoverButton = cloneHoverButton($baseHoverButton, pushPinIcon, 'ピン留めを変更');
+    const $newHoverButton = cloneHoverButton($baseHoverButton, pushPinIcon, i18n('changePinned'));
     $hoverButtonContainer.appendChild($newHoverButton);
     $newHoverButton.addEventListener('click', () => onPinButtonClick($newHoverButton));
   }
@@ -529,7 +530,7 @@
         h('div', { class: 'dyab-bookmarks-button-popover-inner' }),
       ]),
     ]);
-    const $addButton = h('div', { class: 'dyab-bookmarks-button' }, [i(addIcon), h('span', '関連ページを追加')]);
+    const $addButton = h('div', { class: 'dyab-bookmarks-button' }, [i(addIcon), h('span', i18n('saveRelatedPage'))]);
     const $bookmarkContainer = h('div', { class: 'dyab-bookmarks' }, [
       h('div', { class: 'dyab-bookmarks-button-container' }, [$pinButton, $pinPopover]),
       h('div', { class: 'dyab-bookmarks-container' }),
@@ -542,16 +543,16 @@
     const $bookmarkDialogTitle = h('input', { class: 'dyab-bookmark-dialog-title' });
     const $bookmarkDialogUrl = h('input', { class: 'dyab-bookmark-dialog-url' });
     const $bookmarkDialogCloseButton = h('div', { class: `dyab-icon-button` }, [i(closeIcon)]);
-    const $bookmarkDialogSaveButton = h('div', { class: `dyab-button` }, '保存');
+    const $bookmarkDialogSaveButton = h('div', { class: `dyab-button` }, i18n('save'));
 
     const $bookmarkDialog = h('div', { class: 'dyab-dialog' }, [
       h('div', { class: 'dyab-dialog-header' }, [
-        h('div', '関連ページを保存'),
+        h('div', i18n('saveRelatedPage')),
         h('div', { class: 'dyab-pull-right' }, [$bookmarkDialogCloseButton]),
       ]),
       h('div', { class: 'dyab-dialog-body' }, [
-        h('div', { class: 'dyab-form-control' }, [h('label', 'タイトル'), h('div', [$bookmarkDialogTitle])]),
-        h('div', { class: 'dyab-form-control' }, [h('label', 'URL'), h('div', [$bookmarkDialogUrl])]),
+        h('div', { class: 'dyab-form-control' }, [h('label', i18n('title')), h('div', [$bookmarkDialogTitle])]),
+        h('div', { class: 'dyab-form-control' }, [h('label', i18n('url')), h('div', [$bookmarkDialogUrl])]),
       ]),
       h('div', { class: 'dyab-dialog-footer' }, [h('div', { class: 'dyab-pull-right' }, [$bookmarkDialogSaveButton])]),
     ]);

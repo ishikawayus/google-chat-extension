@@ -8,5 +8,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "rules": {}
+  "rules": {
+    "dot-notation": 0 // Conflict with noPropertyAccessFromIndexSignature in ts
+  }
 }
