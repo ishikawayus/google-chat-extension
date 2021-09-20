@@ -270,16 +270,18 @@
 
   /**
    * @param {Reaction} reaction
+   * @param {Element} $reaction
    */
-  function createReaction(reaction) {
+  function createReaction(reaction, $reaction) {
     return h('div', { class: 'Bx60Yc' }, [
       h(
         'div',
         {
           role: 'menuitem',
           class: 'U26fgb mUbCce fKz7Od dtPjgd M9Bg4d',
-          jscontroller: 'RCdJKe',
+          jscontroller: $reaction.getAttribute('jscontroller') ?? 'zOWes',
           jsaction:
+            $reaction.getAttribute('jsaction') ??
             'click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventMouseEvents=true|preventDefault=true); touchcancel:JMtRjd;',
           jsshadow: '',
           jsname: 'vnVdbf',
@@ -329,7 +331,7 @@
         console.error('Failed to get $reaction or reaction', $reaction, reaction, i);
         break;
       }
-      $reactionContainer.insertBefore(createReaction(reaction), $reaction);
+      $reactionContainer.insertBefore(createReaction(reaction, $reaction), $reaction);
       $reaction.remove();
     }
   }
