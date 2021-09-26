@@ -274,39 +274,25 @@
    * @param {Element} $reaction
    */
   function createReaction(reaction, $reaction) {
-    return h('div', { class: 'Bx60Yc' }, [
-      h(
-        'div',
-        {
-          role: 'menuitem',
-          class: 'U26fgb mUbCce fKz7Od dtPjgd M9Bg4d',
-          jscontroller: $reaction.getAttribute('jscontroller') ?? 'zOWes',
-          jsaction:
-            $reaction.getAttribute('jsaction') ??
-            'click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventMouseEvents=true|preventDefault=true); touchcancel:JMtRjd;',
-          jsshadow: '',
-          jsname: 'vnVdbf',
-          'aria-label': reaction.label,
-          'aria-disabled': 'false',
-          tabindex: '-1',
-          'data-emoji': reaction.label,
-        },
-        [
-          h('div', { class: 'VTBa7b MbhUzd', jsname: 'ksKsZd' }),
-          h('span', { jsslot: '', class: 'xjKiLb' }, [
-            h('span', { class: 'Ce1Y1c', style: 'top: -12px' }, [
-              h('img', {
-                'data-emoji': reaction.label,
-                class: 'iiJ4W',
-                alt: reaction.label,
-                'aria-label': reaction.label,
-                src: reaction.src,
-              }),
-            ]),
-          ]),
-        ]
-      ),
-    ]);
+    const $newReaction = $reaction.cloneNode(true);
+    if (!($newReaction instanceof Element)) {
+      throw new Error('Failed to clone node');
+    }
+    const $menuitem = $newReaction.querySelector('[role="menuitem"]');
+    const $img = $newReaction.querySelector('img');
+    if ($menuitem == null || $img == null) {
+      throw new Error('Failed to clone node');
+    }
+    $menuitem.classList.remove('qs41qe');
+    $menuitem.setAttribute('jslog', '');
+    $menuitem.setAttribute('aria-label', reaction.label);
+    $menuitem.setAttribute('data-emoji', reaction.label);
+    $menuitem.removeAttribute('data-tooltip');
+    $img.setAttribute('aria-label', reaction.label);
+    $img.setAttribute('data-emoji', reaction.label);
+    $img.setAttribute('alt', reaction.label);
+    $img.setAttribute('src', reaction.src);
+    return $newReaction;
   }
 
   /**
