@@ -1,27 +1,70 @@
 (async () => {
-  const { loadLocale, saveLocale } = window.y9JTVCMg;
+  const { loadSetting, saveSetting } = window.y9JTVCMg;
 
-  const $locale = /** @type {HTMLSelectElement} */ (document.getElementById('locale'));
+  /** @type {Array<keyof Setting>} */
+  const keys = [
+    'locale',
+    'isAdvancedSearchEnabled',
+    'isMessageTimestampTooltipEnabled',
+    'isMessageLinkCopyButtonEnabled',
+    'isMessagePinEnabled',
+    'isRecentlyUsedReactionEnabled',
+  ];
+
+  /**
+   * @type {{ [key: string]: HTMLInputElement & HTMLSelectElement }}
+   */
+  const fields = {};
+  for (const key of keys) {
+    const $element = /** @type {HTMLInputElement &  HTMLSelectElement} */ (document.getElementById(key));
+    if ($element == null) {
+      console.warn('Failed to get $element', key, $element);
+      return;
+    }
+    fields[key] = $element;
+  }
   const $save = document.getElementById('save');
   const $saved = document.getElementById('saved');
-  if ($locale == null || $save == null || $saved == null) {
-    console.warn('Failed to get $locale, $save or $saved', $locale, $save, $saved);
+  if ($save == null || $saved == null) {
+    console.warn('Failed to get  $save or $saved', $save, $saved);
     return;
   }
 
-  $locale.value = await loadLocale();
-
-  $locale.addEventListener('change', () => {
-    $saved.textContent = '';
-  });
+  const setting = await loadSetting();
+  for (const key of keys) {
+    const $element = fields[key];
+    if ($element != null) {
+      const value = setting[key];
+      if (typeof value === 'boolean') {
+        $element.checked = value;
+      } else {
+        $element.value = value;
+      }
+      $element.addEventListener('change', () => {
+        $saved.textContent = '';
+      });
+    }
+  }
 
   $save.addEventListener('click', async () => {
-    const locale = $locale.value;
-    if (locale !== 'en' && locale !== 'ja') {
-      console.warn('Failed to get locale', locale);
-    } else {
-      await saveLocale(locale);
-      $saved.textContent = 'Saved!';
+    /** @type {Partial<Setting>} */
+    const setting = {};
+    for (const key of keys) {
+      const $element = fields[key];
+      if ($element != null) {
+        if (key === 'locale') {
+          const locale = $element.value;
+          if (locale !== 'en' && locale !== 'ja') {
+            console.warn('Failed to get locale', locale);
+          } else {
+            setting.locale = locale;
+          }
+        } else {
+          setting[key] = $element.checked;
+        }
+      }
     }
+    await saveSetting(setting);
+    $saved.textContent = 'Saved!';
   });
 })();

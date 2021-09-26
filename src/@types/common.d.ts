@@ -18,6 +18,15 @@ interface Reaction {
   src: string;
 }
 
+interface Setting {
+  locale: 'en' | 'ja';
+  isAdvancedSearchEnabled: boolean;
+  isMessageTimestampTooltipEnabled: boolean;
+  isMessageLinkCopyButtonEnabled: boolean;
+  isMessagePinEnabled: boolean;
+  isRecentlyUsedReactionEnabled: boolean;
+}
+
 interface Window {
   y9JTVCMg: {
     i18n(key: string, ...args: unknown[]): string;
@@ -44,6 +53,8 @@ interface Window {
     saveBookmarks(bookmarks: Record<string, Bookmark[]>): Promise<void>;
     loadRecentlyUsedReactions(): Promise<Reaction[]>;
     saveRecentlyUsedReactions(reactions: Reaction[]): Promise<void>;
+    loadSetting(): Promise<Setting>;
+    saveSetting(setting: Partial<Setting>): Promise<void>;
   };
 }
 declare var window: Window & typeof globalThis;

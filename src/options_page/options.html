@@ -3,6 +3,7 @@
 <title>google-chat-extension</title>
 
 <h1>google-chat-extension</h1>
+
 <div>
   <label>Locale</label>
   <select id="locale">
@@ -10,6 +11,27 @@
     <option value="ja">日本語</option>
   </select>
 </div>
+<div>
+  <label>Advanced Search Enabled</label>
+  <input type="checkbox" id="isAdvancedSearchEnabled" />
+</div>
+<div>
+  <label>Message Timestamp Tooltip Enabled</label>
+  <input type="checkbox" id="isMessageTimestampTooltipEnabled" />
+</div>
+<div>
+  <label>Message Link Copy Button Enabled</label>
+  <input type="checkbox" id="isMessageLinkCopyButtonEnabled" />
+</div>
+<div>
+  <label>Message Pin Enabled</label>
+  <input type="checkbox" id="isMessagePinEnabled" />
+</div>
+<div>
+  <label>Recently Used Reaction Enabled</label>
+  <input type="checkbox" id="isRecentlyUsedReactionEnabled" />
+</div>
+
 <div><button id="save">Save</button> <span id="saved"></span></div>
 
 <script src="../content_scripts/common.js"></script>

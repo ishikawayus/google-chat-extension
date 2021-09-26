@@ -360,6 +360,41 @@
     return saveObject('recentlyUsedReactions', reactions);
   }
 
+  /**
+   * @returns {Promise<Setting>}
+   */
+  async function loadSetting() {
+    return {
+      locale: await loadLocale(),
+      isAdvancedSearchEnabled: (await loadObject('isAdvancedSearchEnabled')) ?? true,
+      isMessageTimestampTooltipEnabled: (await loadObject('isMessageTimestampTooltipEnabled')) ?? true,
+      isMessageLinkCopyButtonEnabled: (await loadObject('isMessageLinkCopyButtonEnabled')) ?? true,
+      isMessagePinEnabled: (await loadObject('isMessagePinEnabled')) ?? true,
+      isRecentlyUsedReactionEnabled: (await loadObject('isRecentlyUsedReactionEnabled')) ?? true,
+    };
+  }
+
+  /**
+   * @param {Partial<Setting>} setting
+   */
+  async function saveSetting(setting) {
+    /** @type {Array<keyof Setting>} */
+    const keys = [
+      'locale',
+      'isAdvancedSearchEnabled',
+      'isMessageTimestampTooltipEnabled',
+      'isMessageLinkCopyButtonEnabled',
+      'isMessagePinEnabled',
+      'isRecentlyUsedReactionEnabled',
+    ];
+    for (const key of keys) {
+      const value = setting[key];
+      if (value != null) {
+        await saveObject(key, value);
+      }
+    }
+  }
+
   window.y9JTVCMg = {
     i18n,
     isEmpty,
@@ -375,6 +410,8 @@
     saveBookmarks,
     loadRecentlyUsedReactions,
     saveRecentlyUsedReactions,
+    loadSetting,
+    saveSetting,
   };
 
   (async () => {
