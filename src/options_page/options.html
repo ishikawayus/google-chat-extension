@@ -1,41 +1,62 @@
 <!DOCTYPE html>
 <meta charset="utf-8" />
 <title>google-chat-extension</title>
+<style>
+  body {
+    color: #333;
+    background-color: #eee;
+  }
+  .container {
+    background-color: #fff;
+    padding: 8px;
+    border: solid 1px #ccc;
+  }
+  .container:not(:first-child) {
+    margin-top: 16px;
+  }
+  .container > *:not(:first-child) {
+    margin-top: 8px;
+  }
+</style>
 
 <h1>google-chat-extension</h1>
-
-<div>
-  <label>Locale</label>
-  <select id="locale">
-    <option value="en">English</option>
-    <option value="ja">日本語</option>
-  </select>
+<div class="container">
+  <div>
+    <label>Locale</label>
+    <select id="locale">
+      <option value="en">English</option>
+      <option value="ja">日本語</option>
+    </select>
+  </div>
+  <div>
+    <label>Advanced Search Enabled</label>
+    <input type="checkbox" id="isAdvancedSearchEnabled" />
+  </div>
+  <div>
+    <label>Message Timestamp Tooltip Enabled</label>
+    <input type="checkbox" id="isMessageTimestampTooltipEnabled" />
+  </div>
+  <div>
+    <label>Message Link Copy Button Enabled</label>
+    <input type="checkbox" id="isMessageLinkCopyButtonEnabled" />
+  </div>
+  <div>
+    <label>Message Pin Enabled</label>
+    <input type="checkbox" id="isMessagePinEnabled" />
+  </div>
+  <div>
+    <label>Recently Used Reaction Enabled</label>
+    <input type="checkbox" id="isRecentlyUsedReactionEnabled" />
+  </div>
+  <div><button id="save">Save</button> <span id="saved"></span></div>
 </div>
-<div>
-  <label>Advanced Search Enabled</label>
-  <input type="checkbox" id="isAdvancedSearchEnabled" />
+<div class="container">
+  <div><button id="exportData">Export Data</button></div>
 </div>
-<div>
-  <label>Message Timestamp Tooltip Enabled</label>
-  <input type="checkbox" id="isMessageTimestampTooltipEnabled" />
+<div class="container">
+  <div><input type="file" id="importDataFile" /></div>
+  <div><button id="importData">Import Data</button></div>
 </div>
-<div>
-  <label>Message Link Copy Button Enabled</label>
-  <input type="checkbox" id="isMessageLinkCopyButtonEnabled" />
-</div>
-<div>
-  <label>Message Pin Enabled</label>
-  <input type="checkbox" id="isMessagePinEnabled" />
-</div>
-<div>
-  <label>Recently Used Reaction Enabled</label>
-  <input type="checkbox" id="isRecentlyUsedReactionEnabled" />
-</div>
-
-<div><button id="save">Save</button> <span id="saved"></span></div>
-
-<div><button id="exportData">Export Data</button></div>
-<div><button id="importData">Import Data</button> <input type="file" id="importDataFile" /></div>
 
 <script src="../content_scripts/common.js"></script>
 <script src="options.js"></script>
