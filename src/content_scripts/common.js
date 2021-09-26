@@ -274,13 +274,22 @@
    * @param {string} key
    * @returns {Promise<any>}
    */
-  function loadObject(key) {
+  async function loadObject(key) {
+    const items = await loadRawObject(key);
+    return items[key];
+  }
+
+  /**
+   * @param {string | null} key
+   * @returns {Promise<any>}
+   */
+  function loadRawObject(key) {
     return new Promise((resolve, reject) => {
       window.chrome.storage.local.get(key, (items) => {
         if (window.chrome.runtime.lastError) {
           reject(window.chrome.runtime.lastError);
         } else {
-          resolve(items[key]);
+          resolve(items);
         }
       });
     });
@@ -292,8 +301,16 @@
    * @returns {Promise<void>}
    */
   function saveObject(key, obj) {
+    const items = { [key]: obj };
+    return saveRawObject(items);
+  }
+
+  /**
+   * @param {{ [key: string]: unknown }} items
+   * @returns {Promise<void>}
+   */
+  function saveRawObject(items) {
     return new Promise((resolve, reject) => {
-      const items = { [key]: obj };
       window.chrome.storage.local.set(items, () => {
         if (window.chrome.runtime.lastError) {
           reject(window.chrome.runtime.lastError);
@@ -412,6 +429,8 @@
     saveRecentlyUsedReactions,
     loadSetting,
     saveSetting,
+    loadRawObject,
+    saveRawObject,
   };
 
   (async () => {

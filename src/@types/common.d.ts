@@ -55,6 +55,8 @@ interface Window {
     saveRecentlyUsedReactions(reactions: Reaction[]): Promise<void>;
     loadSetting(): Promise<Setting>;
     saveSetting(setting: Partial<Setting>): Promise<void>;
+    loadRawObject(key: string | null): Promise<unknown>;
+    saveRawObject(data: unknown): Promise<void>;
   };
 }
 declare var window: Window & typeof globalThis;

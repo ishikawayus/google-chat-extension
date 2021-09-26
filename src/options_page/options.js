@@ -1,5 +1,5 @@
 (async () => {
-  const { loadSetting, saveSetting } = window.y9JTVCMg;
+  const { loadSetting, saveSetting, loadRawObject, saveRawObject } = window.y9JTVCMg;
 
   /** @type {Array<keyof Setting>} */
   const keys = [
@@ -66,5 +66,36 @@
     }
     await saveSetting(setting);
     $saved.textContent = 'Saved!';
+  });
+
+  document.getElementById('exportData')?.addEventListener('click', async () => {
+    const data = await loadRawObject(null);
+    console.log('exportData', data);
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const $a = document.createElement('a');
+    $a.href = url;
+    $a.download = 'data.json';
+    $a.click();
+  });
+
+  document.getElementById('importData')?.addEventListener('click', async () => {
+    const $file = /** @type {HTMLInputElement} */ (document.getElementById('importDataFile'));
+    const file = $file?.files?.[0];
+    if (file == null) {
+      console.warn('Failed to get file');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const data = reader.result;
+      console.log('importData', data);
+      if (data == null || typeof data !== 'string') {
+        console.warn('Failed to read file');
+        return;
+      }
+      saveRawObject(JSON.parse(data));
+    };
+    reader.readAsText(file);
   });
 })();
